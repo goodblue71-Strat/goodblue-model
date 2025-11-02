@@ -7,8 +7,8 @@ from openai import OpenAI
 # ---------------------------
 client = OpenAI()  # Make sure OPENAI_API_KEY is set in your environment or Streamlit secrets
 
-input_file = "strategy_pairs_enriched.jsonl"
-output_file = "strategy_pairs_filled.jsonl"
+input_file = "data/processed/strategy_pairs_enriched.jsonl"
+output_file = "data/train/strategy_pairs_filled.jsonl"
 
 # ---------------------------
 # 2. Load the enriched data
