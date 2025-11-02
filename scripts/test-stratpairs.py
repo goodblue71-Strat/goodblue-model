@@ -1,6 +1,6 @@
 import json
 
-file_path = "strategy_pairs_filled.jsonl"
+file_path = "data/train/strategy_pairs_filled.jsonl"
 
 required_fields = ["instruction", "input", "output"]
 
