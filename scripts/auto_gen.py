@@ -2,13 +2,17 @@ import json
 import random
 import re
 
-# Load extracted text
-with open("strategy_texts.json", "r") as f:
+# ---------------------------
+# 1. Load the extracted data
+# ---------------------------
+with open("data/processed/strategy_texts.json", "r") as f:
     data = json.load(f)
 
 pairs = []
 
-# Common strategy instruction templates
+# ---------------------------
+# 2. Instruction templates
+# ---------------------------
 templates = [
     "Summarize the key AI and digital transformation trends from this report.",
     "List the major companies and industries discussed in this document.",
@@ -19,7 +23,9 @@ templates = [
     "Condense this report into a 3-point executive summary."
 ]
 
-# Domain keywords mapping
+# ---------------------------
+# 3. Domain & Category Maps
+# ---------------------------
 domain_map = {
     "mckinsey": "consulting",
     "bain": "consulting",
@@ -37,7 +43,6 @@ domain_map = {
     "aveva": "industrial"
 }
 
-# Category keywords (used to label type of document)
 category_map = {
     "trend": ["trend", "forecast", "insight"],
     "analysis": ["analysis", "report", "study"],
@@ -46,15 +51,45 @@ category_map = {
     "policy": ["policy", "governance", "regulation"]
 }
 
-# Normalize list/dict input
+# ---------------------------
+# 4. Normalize input structure
+# ---------------------------
 if isinstance(data, dict):
-    items = data.items()
+    # { "filename.pdf": "text..." }
+    items = list(data.items())
+    print(f"📂 Detected dictionary with {len(items)} documents.")
 elif isinstance(data, list):
-    items = [(entry.get("filename", "unknown"), entry.get("text", "")) for entry in data]
+    items = []
+    for entry in data:
+        # Try to detect likely keys dynamically
+        filename = (
+            entry.get("filename")
+            or entry.get("file")
+            or entry.get("name")
+            or entry.get("source")
+            or "unknown"
+        )
+        text = (
+            entry.get("text")
+            or entry.get("content")
+            or entry.get("data")
+            or entry.get("body")
+            or ""
+        )
+        items.append((filename, text))
+    print(f"📂 Detected list with {len(items)} documents.")
 else:
     raise TypeError(f"Unexpected data type: {type(data)}")
 
-# Helper functions
+# Debug: show first detected entry
+if items:
+    sample_name, sample_text = items[0]
+    print(f"🔍 Sample detected file: {sample_name}")
+    print(f"🔍 Text length: {len(sample_text)} characters")
+
+# ---------------------------
+# 5. Helper functions
+# ---------------------------
 def infer_domain(filename):
     name = filename.lower()
     for key, val in domain_map.items():
@@ -70,8 +105,12 @@ def infer_category(filename, text):
             return cat
     return "general"
 
-# Generate enriched pairs
+# ---------------------------
+# 6. Generate enriched pairs
+# ---------------------------
 for filename, text in items:
+    if not text.strip():
+        continue  # skip empty entries
     snippet = text[:3000].strip()
     domain = infer_domain(filename)
     category = infer_category(filename, text)
@@ -86,10 +125,17 @@ for filename, text in items:
             "output": "Generated strategy insight placeholder."
         })
 
-# Save as JSONL
-with open("strategy_pairs_enriched.jsonl", "w") as f:
-    for p in pairs:
-        json.dump(p, f)
-        f.write("\n")
+# ---------------------------
+# 7. Save JSONL output
+# ---------------------------
+if not pairs:
+    print("⚠️ No valid text entries found. Check your strategy_texts.json structure.")
+else:
+    out_file = "data/processed/strategy_pairs_enriched.jsonl"
+    with open(out_file, "w") as f:
+        for p in pairs:
+            json.dump(p, f)
+            f.write("\n")
 
-print(f"✅ Created {len(pairs)} enriched strategy pairs in strategy_pairs_enriched.jsonl")
+    print(f"✅ Created {len(pairs)} enriched strategy pairs in {out_file}")
+    print(f"🧾 Example record:\n{json.dumps(pairs[0], indent=2)[:500]}")
