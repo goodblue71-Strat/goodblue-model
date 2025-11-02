@@ -1,0 +1,32 @@
+# --- Core Python & Data Utilities ---
+pandas
+numpy
+tqdm
+datasets
+scikit-learn
+
+# --- Model & Embedding Frameworks ---
+torch
+transformers
+sentence-transformers
+accelerate
+peft
+bitsandbytes
+
+# --- Training & Evaluation ---
+evaluate
+rouge-score
+sacrebleu
+matplotlib
+seaborn
+
+# --- File Handling & NLP Utilities ---
+python-dotenv
+pypdf
+openpyxl
+nltk
+regex
+
+# --- Optional: Integration & Experiment Tracking ---
+huggingface-hub
+wandb
